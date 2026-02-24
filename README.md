@@ -4,11 +4,11 @@
 
 ## 📖*Content*
 ---
-1. [💡Description](#💡Description)
-2. [✅Instructions](#✅Instructions)
-3. [⛏Technologies](#⛏Technologies)
-4. [📓メモ](#メモ)
-5. [🌈Resources](#🌈Resources)
+1. [💡Description](README.md#💡Description)
+2. [✅Instructions](README.md#✅Instructions)
+3. [⛏Technologies](README.md#⛏*Technologies)
+4. [📓メモ](README.md#メモ)
+5. [🌈Resources](README.md#🌈Resources)
 
 ## 💡Description
 ---
