@@ -4,11 +4,11 @@
 
 ## 📖*Content*
 ---
-1. [💡Description](A-Maze-ing.md#💡Description)
-2. [✅Instructions](A-Maze-ing.md#✅Instructions)
-3. [⛏Technologies](A-Maze-ing.md#⛏Technologies)
-4. [📓メモ](A-Maze-ing.md#メモ)
-5. [🌈Resources](A-Maze-ing.md#🌈Resources)
+1. [💡Description](#💡Description)
+2. [✅Instructions](#✅Instructions)
+3. [⛏Technologies](#⛏Technologies)
+4. [📓メモ](#メモ)
+5. [🌈Resources](#🌈Resources)
 
 ## 💡Description
 ---
