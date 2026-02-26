@@ -1,6 +1,5 @@
 import random
 from enum import Enum
-from dataclasses import dataclass, field
 
 
 class Cell(Enum):
@@ -8,48 +7,67 @@ class Cell(Enum):
     WALL = 1
     ENTRY = 2
     EXIT = 3
-    ROURTY_TWO = 4
+    FOURTY_TWO = 4
 
-@dataclass
-class MazeData:
-    width: int
-    height: int
-    grid: list[list[int]] = field(init=False)
-
-    def __post_init__(self) -> None:
-        if self.width % 2 == 0 or self.height % 2 == 0:
-            raise ValueError("Width and height must be odd numbers for this grid responsentation.")
-        self.grid = [[Cell.WALL.value for _ in range(self.width)] for _ in range(self.height)]
 
 class MazeGenerator:
-    def __init__(self, width: int, height: int, seed: int | None) -> None:
-        self.maze_data = MazeData(width=width, height=height)
+    def __init__(self, width: int, height: int, entry_point: tuple[int, int],
+            exit_point: tuple[int, int], seed: int | None = None) -> None:
+        # 横のセルの個数
+        self.width = width
+        # 縦のセルの個数
+        self.height = height
+
+        # 2N + 1に配列を拡張
+        self.w_grid = width * 2 + 1
+        self.h_grid = height * 2 + 1
+        self.entry_point = entry_point
+        self.exit_point = exit_point
+
         self.seed = seed
+
+        # リスト内のリストに1行分確保→リスト内に1列文確保
+        self.grid: list[list[int]] = [
+            [Cell.ROAD.value for _ in range(self.w_grid)]
+            for _ in range(self.h_grid)
+        ]
 
     def generate(self, start_x: int = 1, start_y: int=1) -> None:
         if self.seed is not None:
             random.seed(self.seed)
-        start_x = start_x if start_x % 2 != 0 else start_x +1
-        start_y = start_y if start_y % 2 != 0 else start_y +1
+        self._build_outer_walls()
+        self._place_pillars_and_knock_down()
 
-        self._carve_passages(start_x, start_y)
+        # ENTRY
+        ex, ey = self.entry_point
+        self.grid[ey * 2 + 1][ex * 2 + 1] = Cell.ENTRY.value
 
-        self.maze_data.grid[1][1] = Cell.ENTRY.value
-        self.maze_data.grid[self.maze_data.height - 2][self.maze_data.width - 2] = Cell.EXIT.value
+        gx, gy = self.exit_point
+        self.grid[gy * 2 + 1][gx * 2 + 1] = Cell.EXIT.value
 
-    def _carve_passages(self, cx: int, cy: int) -> None:
-        self.maze_data.grid[cy][cx] = Cell.ROAD.value
+    def _build_outer_walls(self) -> None:
+        for y in range(0, self.h_grid):
+            for x in range(0, self.w_grid):
+                if y == 0 or x == 0 or y == self.h_grid - 1 or x == self.w_grid - 1:
+                    self.grid[y][x] = Cell.WALL.value
 
-        directions: list[tuple[int, int]] = [(0, -2), (2, 0), (0, 2), (-2, 0)]
-        random.shuffle(directions)
+    def _place_pillars_and_knock_down(self) -> None:
+        for y in range(2, self.h_grid - 1, 2):
+            for x in range(2, self.w_grid - 1, 2):
+                self.grid[y][x] = Cell.WALL.value
+                if y == 2 and x == 2: # 一番上の一番左は左下右上(WSEN)
+                    directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+                elif y == 2: # 一番上のそれ以外は下右上(SEN)
+                    directions = [(0, 1), (1, 0), (0, -1)]
+                elif x == 2: #一番左(上記を除く)は左下右(WSE)
+                    directions = [(-1, 0), (0, 1), (1, 0)]
+                else: # 上から二番目、左から二番目は下右(SE)
+                    directions = [(0, 1), (1, 0)]
 
-        for dx, dy in directions:
-            nx, ny = cx + dx, cy + dy
-            if 1 <= nx < self.maze_data.width -1 and 1 <= ny < self.maze_data.height - 1:
-                if self.maze_data.grid[ny][nx] == Cell.WALL.value:
-                    self.maze_data.grid[cy + dy // 2][cx + dx // 2] = Cell.ROAD.value
-                    self._carve_passages(nx, ny)
+                dx, dy = random.choice(directions)
+                self.grid[y + dy][x + dx] = Cell.WALL.value
+
 
     def get_grid(self) -> list[list[int]]:
-        return self.maze_data.grid
+        return self.grid
 
