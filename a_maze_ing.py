@@ -9,6 +9,12 @@ reset = "\33[0m"
 
 
 def print_maze(maze_grid: list[list[int]]) -> None:
+    """
+    Print the maze grid to the console.
+    
+    Args:
+        maze_grid (list[list[int]]): The maze grid to print.
+    """
     for row in maze_grid:
         line = ""
         for cell in row:
@@ -24,14 +30,15 @@ def print_maze(maze_grid: list[list[int]]) -> None:
 
 
 def main() -> None:
+    """
+    Main function for testing maze generation
+    """
     if len(sys.argv) != 2:
         print("Usage: python3 a_maze_ing.py <config_file>.txt")
         sys.exit(1)
 
     config_file = sys.argv[1]
     try:
-        """
-        """
         # configにconfig.txtをパースして戻す
         config = parse_config(config_file)
 
