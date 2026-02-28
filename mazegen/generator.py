@@ -25,12 +25,13 @@ class MazeGenerator:
     """A class for generating a maze.
 
     Attributes:
-        width (int):width of the maze.
-        height (int):height of the maze.
-        entry_point (tuple[int, int]):entry point of the maze.
-        exit_point (tuple[int, int]):exit point of the maze.
-        seed (int | None):seed for random number generation.
-        grid (list[list[int]]):grid of the maze.
+        _width (int):width of the maze.
+        _height (int):height of the maze.
+        _entry_point (tuple[int, int]):entry point of the maze.
+        _exit_point (tuple[int, int]):exit point of the maze.
+        _seed (int | None):seed for random number generation.
+        _grid (list[list[int]]):grid of the maze.
+        _perfect (bool):check perfect of the maze.
     """
     def __init__(self, width: int, height: int,
                  entry_point: tuple[int, int],
@@ -45,6 +46,7 @@ class MazeGenerator:
             entry_point (tuple[int, int]):entry point of the maze.
             exit_point (tuple[int, int]):exit point of the maze.
             seed (int | None):seed for random number generation.
+            perfect (bool)
         """
         self._width = width
         self._height = height
@@ -58,17 +60,19 @@ class MazeGenerator:
         self._h_grid = height * 2 + 1
 
         # 42スタンプ埋め込み用
+        # 横7 * 縦5 (+ 2)セル必要なのでそれ未満の時False
         self._has_ft = False
         self._ft_min_x = -1
         self._ft_max_x = -1
         self._ft_min_y = -1
         self._ft_max_y = -1
 
-        # 横の配列を内包した縦の配列のリスト
+        # 横の配列 * 縦の配列のリスト(一旦ROADで埋める)
         self._grid: list[list[int]] = [
             [Cell.ROAD.value for _ in range(self._w_grid)]
             for _ in range(self._h_grid)
         ]
+
         return None
 
     def generate(self) -> None:
@@ -80,8 +84,8 @@ class MazeGenerator:
         # 周りのWALL埋め込み
         self._build_outer_walls()
 
-        # 中心に42スタンプを埋め込み
-        if self._width >= 12 and self._height >= 9:
+        # ロゴの上下左右に+ 1マス分あれば中心に42スタンプを埋め込み
+        if self._width >= 9 and self._height >= 7:
             self._build_fourty_two()
 
         # 柱の埋め込み→棒倒し！
@@ -94,6 +98,7 @@ class MazeGenerator:
         # gx, gy: EXIT(ゴール)の座標
         gx, gy = self._exit_point
         self._grid[gy * 2 + 1][gx * 2 + 1] = Cell.EXIT.value
+
         return None
 
 
@@ -101,18 +106,19 @@ class MazeGenerator:
         """
         Build outer walls of the maze.
         """
-        # y座標分ループ
+        # 縦配列(y) * 横配列(x) 分ループ、上下左右の辺にWALL埋め込み
         for y in range(0, self._h_grid):
-            # x座標分ループ
             for x in range(0, self._w_grid):
-                # 上下左右の辺にWALL埋め込み
                 if y == 0 or y == self._h_grid - 1 or x == 0 or x == self._w_grid - 1:
                     self._grid[y][x] = Cell.WALL.value
+
+        return None
 
     def _build_fourty_two(self) -> None:
         """
         Build the number 42 in the maze.
         """
+        # 42スタンプパターン
         ft_pattern = [
             [1, 0, 0, 0, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 1],
@@ -121,10 +127,11 @@ class MazeGenerator:
             [0, 0, 1, 0, 1, 1, 1]
         ]
 
-        # 42スタンプ開始座標(切り捨て)
+        # 42スタンプ開始セル(切り捨て、左・上寄り)
         start_x = (self._width - 7) // 2
         start_y = (self._height - 5) // 2
 
+        # 42スタンプ使用済みフラグ、開始座標
         self._has_ft = True
         self._ft_min_x = start_x * 2
         self._ft_max_x = (start_x + 7) * 2
@@ -153,15 +160,16 @@ class MazeGenerator:
                 for dy, dx in surrounding_offsets:
                     self._grid[sy + dy][sx + dx] = Cell.WALL.value
 
-        # 42スタンプの右上から真上に一本壁生成(完全迷路用)
+        # 42スタンプの左上から真上に一本壁生成(完全迷路用)
         if self._perfect:
             for y in range(0, self._ft_min_y):
                 self._grid[y][self._ft_min_x] = Cell.WALL.value
+
         return None
 
     def _pillars_and_knock(self) -> None:
         """Place pillars and knock down walls."""
-        # 追加で棒倒しをする42スタンプの左上からの相対座標
+        # 追加で棒倒しをする箇所の、42スタンプの左上からの相対座標
         target_pillars = [
             (4, 0), (6, 0), (4, 2), (6, 2), # 42の4の上の部分
             (0, 8), (2, 8), (0, 10), (2, 10), # 42の4の右下の部分
@@ -169,32 +177,46 @@ class MazeGenerator:
         ]
         for y in range(2, self._h_grid - 1, 2):
             for x in range(2, self._w_grid - 1, 2):
+                # 42スタンプ周りの処理
                 if self._has_ft:
+                    # perfect生成時は縦一本の壁はスキップ
                     if self._perfect and x == self._ft_min_x and y < self._ft_min_y:
                         continue
+                    # 追加で棒倒しをする箇所以外スキップ
                     if self._ft_min_x <= x <= self._ft_max_x and self._ft_min_y <= y <= self._ft_max_y:
                         rel_x = x - self._ft_min_x
                         rel_y = y - self._ft_min_y
                         if (rel_x, rel_y) not in target_pillars:
                             continue
 
+                # 柱の埋め込み
                 self._grid[y][x] = Cell.WALL.value
 
-                if y == 2 and x == 2: # 一番上の一番左は左下右上(WSEN)
+                # 一番上の行の一番左は左下右上(WSEN)
+                if y == 2 and x == 2:
                     directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-                elif y == 2: # 一番上のそれ以外は下右上(SEN)
+
+                # 一番上の行のそれ以外は下右上(SEN)
+                elif y == 2:
                     directions = [(0, 1), (1, 0), (0, -1)]
-                elif x == 2: #一番左(上記を除く)は左下右(WSE)
+
+                #一番左の列の上記以外は左下右(WSE)
+                elif x == 2:
                     directions = [(-1, 0), (0, 1), (1, 0)]
-                else: # 上から二番目、左から二番目は下右(SE)
+
+                # それ以外は下右(SE)
+                else:
                     directions = [(0, 1), (1, 0)]
 
+                # 棒倒し!
                 dx, dy = random.choice(directions)
                 self._grid[y + dy][x + dx] = Cell.WALL.value
+        return None
 
 
     def get_grid(self) -> list[list[int]]:
         """
         Get the grid of the maze.
         """
+        # 迷路の配列を返す
         return self._grid

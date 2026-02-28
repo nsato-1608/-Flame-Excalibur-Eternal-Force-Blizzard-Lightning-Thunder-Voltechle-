@@ -3,16 +3,15 @@ from mazegen.config import parse_config
 from mazegen.generator import MazeGenerator, Cell
 
 
-# ESC [ 色コード m の順番で色付け開始、ESC [ 0 m で色付け終了
-# ESC は16進数で 0x1b 、8進数で 033、10進数で 27 の文字コード
+# "ESC[色コードm"の順番で色付け開始、ESC[0m で色付け終了
+# ESC は16進数で0x1b 8進数で033 10進数で27 の文字コード
 # 1:Bold, 2:Dim, 3:Italic, 4:Underline, 5, 6: 点滅, 7:Invert
-# 文字(START, GOAL)はフロント30~, 空白(ROAD, WALL, FOURTY_TWO)はバック40~
-
+# 文字(START, GOAL)はフロント30~か90~, 空白(ROAD, WALL, FOURTY_TWO)はバック40~か100~
 r_color = "\33[40m" # 黒
-w_color = "\x1b[107m" # 白
-s_color = "\33[1;6;31;42m" # 赤、緑
-g_color = "\33[1;6;31;42m" # 赤、緑
-ft_color = "\33[45m" # マゼンダ
+w_color = "\33[107m" # 白
+s_color = "\33[1;6;91;102m" # 赤文字、緑背景
+g_color = "\33[1;6;91;102m" # 赤文字、緑背景
+ft_color = "\33[105m" # マゼンダ
 reset = "\33[0m"
 
 
@@ -49,10 +48,12 @@ def main() -> None:
 
     config_file = argv[1]
     try:
-        # configにconfig.txtをパースする。(return: MazeConfig)
+        # configにconfig.txtをパースする(MazeConfigクラスが返ってくる)
         config = parse_config(config_file)
 
         print(f"Generating a {config.width} × {config.height} maze")
+
+        # generatorにconfig.txtの内容送り初期化
         generator = MazeGenerator(
             width=config.width,
             height=config.height,
@@ -61,7 +62,9 @@ def main() -> None:
             perfect=config.perfect,
             seed=42
         )
+        # 迷路生成
         generator.generate()
+        # 迷路出力
         print_maze(generator.get_grid())
 
     except (ValueError, TypeError, FileNotFoundError) as e:

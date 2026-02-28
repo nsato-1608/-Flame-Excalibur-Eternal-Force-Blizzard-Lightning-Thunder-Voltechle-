@@ -1,8 +1,14 @@
 # MAZEの設定ファイル
+# WIDTH 迷路の横幅
+# HEIGHT 迷路の高さ
+# ENTRY スタート地点
+# EXIT ゴール地点(最大でWIDTH - 1, HEIGHT - 1が指定可能)
+# OUTPUT_FILE 出力ファイル
+# PERFECT=True 完全迷路フラグ(Falseで複数ルートになる)
 
 WIDTH=20
 HEIGHT=15
 ENTRY=0,0
-EXIT=19, 14
+EXIT=19,14
 OUTPUT_FILE=maze.txt
-PERFECT=False
+PERFECT=True
