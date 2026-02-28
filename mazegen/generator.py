@@ -153,8 +153,10 @@ class MazeGenerator:
                 for dy, dx in surrounding_offsets:
                     self._grid[sy + dy][sx + dx] = Cell.WALL.value
 
-        for y in range(0, self._ft_min_y):
-            self._grid[y][self._ft_min_x] = Cell.WALL.value
+        # 42スタンプの右上から真上に一本壁生成(完全迷路用)
+        if self._perfect:
+            for y in range(0, self._ft_min_y):
+                self._grid[y][self._ft_min_x] = Cell.WALL.value
         return None
 
     def _pillars_and_knock(self) -> None:
@@ -168,7 +170,7 @@ class MazeGenerator:
         for y in range(2, self._h_grid - 1, 2):
             for x in range(2, self._w_grid - 1, 2):
                 if self._has_ft:
-                    if x == self._ft_min_x and y < self._ft_min_y:
+                    if self._perfect and x == self._ft_min_x and y < self._ft_min_y:
                         continue
                     if self._ft_min_x <= x <= self._ft_max_x and self._ft_min_y <= y <= self._ft_max_y:
                         rel_x = x - self._ft_min_x
