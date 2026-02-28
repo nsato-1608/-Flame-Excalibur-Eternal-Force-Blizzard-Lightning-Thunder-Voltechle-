@@ -8,8 +8,8 @@ from mazegen.generator import MazeGenerator, Cell
 # 1:Bold, 2:Dim, 3:Italic, 4:Underline, 5, 6: 点滅, 7:Invert
 # 文字(START, GOAL)はフロント30~, 空白(ROAD, WALL, FOURTY_TWO)はバック40~
 
-r_color = "\33[47m" # 白
-w_color = "\33[40m" # 黒
+r_color = "\33[40m" # 黒
+w_color = "\x1b[107m" # 白
 s_color = "\33[1;6;31;42m" # 赤、緑
 g_color = "\33[1;6;31;42m" # 赤、緑
 ft_color = "\33[45m" # マゼンダ

@@ -84,7 +84,7 @@ class MazeGenerator:
             self._build_fourty_two()
 
         # 柱の埋め込み→棒倒し！
-        self._place_pillars_and_knock_down()
+        self._pillars_and_knock()
 
         # ex, ey: ENTRYの座標
         ex, ey = self._entry_point
@@ -150,15 +150,24 @@ class MazeGenerator:
             self._grid[y][self.ft_min_x] = Cell.WALL.value
         return None
 
-    def _place_pillars_and_knock_down(self) -> None:
+    def _pillars_and_knock(self) -> None:
         """Place pillars and knock down walls."""
+        # 追加で棒倒しをする42スタンプの左上からの相対座標
+        target_pillars = [
+            (4, 0), (6, 0), (4, 2), (6, 2), # 42の4の上の部分
+            (0, 8), (2, 8), (0, 10), (2, 10), # 42の4の右下の部分
+            (14, 10) # 42の2の右下
+        ]
         for y in range(2, self._h_grid - 1, 2):
             for x in range(2, self._w_grid - 1, 2):
                 if self.has_ft:
-                    if self.ft_min_x <= x <= self.ft_max_x and self.ft_min_y <= y <= self.ft_max_y:
-                        continue
                     if x == self.ft_min_x and y < self.ft_min_y:
                         continue
+                    if self.ft_min_x <= x <= self.ft_max_x and self.ft_min_y <= y <= self.ft_max_y:
+                        rel_x = x - self.ft_min_x
+                        rel_y = y - self.ft_min_y
+                        if (rel_x, rel_y) not in target_pillars:
+                            continue
 
                 self._grid[y][x] = Cell.WALL.value
 
@@ -174,17 +183,6 @@ class MazeGenerator:
                 dx, dy = random.choice(directions)
                 self._grid[y + dy][x + dx] = Cell.WALL.value
 
-                #valid_directions = []
-                #for dx, dy in directions:
-                #    target_x = x + dx
-                #    target_y = y + dy
-                #    if self.has_ft and self.ft_min_x <= x <= self.ft_max_x and self.ft_min_y <= y <= self.ft_max_y:
-                #        continue
-                #    valid_directions.append((dx, dy))
-
-                #if valid_directions:
-                #    dx, dy = random.choice(valid_directions)
-                #    self._grid[y + dy][x + dx] = Cell.WALL.value
 
     def get_grid(self) -> list[list[int]]:
         """
