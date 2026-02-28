@@ -57,11 +57,12 @@ class MazeGenerator:
         self._w_grid = width * 2 + 1
         self._h_grid = height * 2 + 1
 
-        self.has_ft = False
-        self.ft_min_x = -1
-        self.ft_max_x = -1
-        self.ft_min_y = -1
-        self.ft_max_y = -1
+        # 42スタンプ埋め込み用
+        self._has_ft = False
+        self._ft_min_x = -1
+        self._ft_max_x = -1
+        self._ft_min_y = -1
+        self._ft_max_y = -1
 
         # 横の配列を内包した縦の配列のリスト
         self._grid: list[list[int]] = [
@@ -120,21 +121,24 @@ class MazeGenerator:
             [0, 0, 1, 0, 1, 1, 1]
         ]
 
+        # 42スタンプ開始座標(切り捨て)
         start_x = (self._width - 7) // 2
         start_y = (self._height - 5) // 2
 
-        self.has_ft = True
-        self.ft_min_x = start_x * 2
-        self.ft_max_x = (start_x + 7) * 2
-        self.ft_min_y = start_y * 2
-        self.ft_max_y = (start_y + 5) * 2
+        self._has_ft = True
+        self._ft_min_x = start_x * 2
+        self._ft_max_x = (start_x + 7) * 2
+        self._ft_min_y = start_y * 2
+        self._ft_max_y = (start_y + 5) * 2
 
+        # 42スタンプの周囲7マス
         surrounding_offsets = [
             (-1, -1), (-1, 0), (-1, 1),
             (0, -1), (0, 1),
             (1, -1), (1, 0), (1, 1)
         ]
 
+        # 7 * 5 マスの内必要な場所だけスタンプ
         for row in range(5):
             for col in range(7):
                 if ft_pattern[row][col] == 0:
@@ -142,12 +146,15 @@ class MazeGenerator:
                 sx = (start_x + col) * 2 + 1
                 sy = (start_y + row) * 2 + 1
 
+                # 42スタンプ埋め
                 self._grid[sy][sx] = Cell.FOURTY_TWO.value
 
+                # 周囲7マスを壁埋め
                 for dy, dx in surrounding_offsets:
                     self._grid[sy + dy][sx + dx] = Cell.WALL.value
-        for y in range(0, self.ft_min_y):
-            self._grid[y][self.ft_min_x] = Cell.WALL.value
+
+        for y in range(0, self._ft_min_y):
+            self._grid[y][self._ft_min_x] = Cell.WALL.value
         return None
 
     def _pillars_and_knock(self) -> None:
@@ -160,12 +167,12 @@ class MazeGenerator:
         ]
         for y in range(2, self._h_grid - 1, 2):
             for x in range(2, self._w_grid - 1, 2):
-                if self.has_ft:
-                    if x == self.ft_min_x and y < self.ft_min_y:
+                if self._has_ft:
+                    if x == self._ft_min_x and y < self._ft_min_y:
                         continue
-                    if self.ft_min_x <= x <= self.ft_max_x and self.ft_min_y <= y <= self.ft_max_y:
-                        rel_x = x - self.ft_min_x
-                        rel_y = y - self.ft_min_y
+                    if self._ft_min_x <= x <= self._ft_max_x and self._ft_min_y <= y <= self._ft_max_y:
+                        rel_x = x - self._ft_min_x
+                        rel_y = y - self._ft_min_y
                         if (rel_x, rel_y) not in target_pillars:
                             continue
 
