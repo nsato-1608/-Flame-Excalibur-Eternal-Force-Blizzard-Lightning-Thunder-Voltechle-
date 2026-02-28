@@ -3,15 +3,18 @@ from mazegen.config import parse_config
 from mazegen.generator import MazeGenerator, Cell
 
 
-s_color = "\33[6;36m"
-e_color = "\33[6;36m"
+w_color = "\33[47m" # 緑
+r_color = "\33[40m" # 黒
+s_color = "\33[6;36m" # 点滅 + シアン
+g_color = "\33[6;36m" # 点滅 + シアン
+ft_color = "\33[41m" # 赤
 reset = "\33[0m"
 
 
 def print_maze(maze_grid: list[list[int]]) -> None:
     """
     Print the maze grid to the console.
-    
+
     Args:
         maze_grid (list[list[int]]): The maze grid to print.
     """
@@ -19,13 +22,15 @@ def print_maze(maze_grid: list[list[int]]) -> None:
         line = ""
         for cell in row:
             if cell == Cell.WALL.value:
-                line += "💤"
+                line += f"{w_color}  {reset}"
             elif cell == Cell.ROAD.value:
-                line += "  "
-            if cell == Cell.ENTRY.value:
+                line += f"{r_color}  {reset}"
+            elif cell == Cell.ENTRY.value:
                 line += f"{s_color}S {reset}"
-            if cell == Cell.EXIT.value:
-                line += f"{e_color}E {reset}"
+            elif cell == Cell.EXIT.value:
+                line += f"{g_color}E {reset}"
+            elif cell == Cell.FOURTY_TWO.value:
+                line += f"{ft_color}  {reset}"
         print(line)
 
 
