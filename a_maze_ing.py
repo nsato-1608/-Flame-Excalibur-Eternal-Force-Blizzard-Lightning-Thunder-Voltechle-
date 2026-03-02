@@ -46,10 +46,11 @@ def main() -> None:
             entry_point=config.entry_point,
             exit_point=config.exit_point,
             perfect=config.perfect,
-            seed=config.seed
+            seed=config.seed,
         )
         # 迷路生成、出力
         generator.generate()
+<<<<<<< HEAD
         # 16進数の文字列リスト受け取り
         hex_grid = generator.get_hex_grid()
 
@@ -60,6 +61,9 @@ def main() -> None:
             entry_point=config.entry_point,
             exit_point=config.exit_point
                 )
+=======
+        generator.solve_maze()
+>>>>>>> c1c7cd251b4b691c1a8297620e54bb4b9ec7a902
 
     except (ValueError, TypeError, FileNotFoundError) as e:
         print(f"ERROR: {e}", file=stderr)

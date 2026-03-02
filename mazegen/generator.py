@@ -1,17 +1,21 @@
 import random
 from enum import Enum
 from time import sleep
+from collections import deque
+
 
 # "ESC[色コードm"の順番で色付け開始、ESC[0m で色付け終了
 # ESC は16進数で0x1b 8進数で033 10進数で27 の文字コード
 # 1:Bold, 2:Dim, 3:Italic, 4:Underline, 5, 6: 点滅, 7:Invert
 # 文字(START, GOAL)はフロント30~か90~, 空白(ROAD, WALL, FOURTY_TWO)はバック40~か100~
-r_color = "\33[40m" # 黒
-w_color = "\33[107m" # 白
-s_color = "\33[1;6;91;102m" # 赤文字、緑背景
-g_color = "\33[1;6;91;102m" # 赤文字、緑背景
-ft_color = "\33[105m" # マゼンダ
+r_color = "\33[40m"  # 黒
+w_color = "\33[107m"  # 白
+s_color = "\33[1;6;91;102m"  # 赤文字、緑背景
+y_color = "\33[43m"  # 黄
+g_color = "\33[1;6;91;102m"  # 赤文字、緑背景
+ft_color = "\33[105m"  # マゼンダ
 reset = "\33[0m"
+
 
 class Cell(Enum):
     """The cell type of the maze.
@@ -25,11 +29,13 @@ class Cell(Enum):
         EXIT (int):exit point in the maze.
         FOURTY_TWO (int):42 point in the maze.
     """
+
     ROAD = 0
     WALL = 1
     ENTRY = 2
     EXIT = 3
     FOURTY_TWO = 4
+    ROUTE = 5
 
 
 class MazeGenerator:
@@ -44,11 +50,16 @@ class MazeGenerator:
         _grid (list[list[int]]):grid of the maze.
         _perfect (bool):check perfect of the maze.
     """
-    def __init__(self, width: int, height: int,
-                 entry_point: tuple[int, int],
-                 exit_point: tuple[int, int],
-                 perfect: bool = False,
-                 seed: int | None = None) -> None:
+
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        entry_point: tuple[int, int],
+        exit_point: tuple[int, int],
+        perfect: bool = False,
+        seed: int | None = None,
+    ) -> None:
         """Initialize the MazeGenerator.
 
         Args:
@@ -80,8 +91,7 @@ class MazeGenerator:
 
         # 横の配列 * 縦の配列のリスト(一旦ROADで埋める)
         self._grid: list[list[int]] = [
-            [Cell.ROAD.value for _ in range(self._w_grid)]
-            for _ in range(self._h_grid)
+            [Cell.ROAD.value for _ in range(self._w_grid)] for _ in range(self._h_grid)
         ]
 
         return None
@@ -121,6 +131,7 @@ class MazeGenerator:
         return None
 
     print_init = False
+
     def _print_maze(self, sleep_time: float = 0.1) -> None:
         """
         Print the maze grid to the console.
@@ -136,21 +147,47 @@ class MazeGenerator:
         output = "\x1b[u"
         for row in self._grid:
             for cell in row:
-                if cell == Cell.ROAD.value: # 0
+                if cell == Cell.ROAD.value:  # 0
                     output += f"{r_color}  {reset}"
-                elif cell == Cell.WALL.value: # 1
+                elif cell == Cell.WALL.value:  # 1
                     output += f"{w_color}  {reset}"
-                elif cell == Cell.ENTRY.value: # 2
+                elif cell == Cell.ENTRY.value:  # 2
                     output += f"{s_color}S {reset}"
-                elif cell == Cell.EXIT.value: # 3
+                elif cell == Cell.EXIT.value:  # 3
                     output += f"{g_color}G {reset}"
-                elif cell == Cell.FOURTY_TWO.value: # 4
+                elif cell == Cell.FOURTY_TWO.value:  # 4
                     output += f"{ft_color}  {reset}"
+                elif cell == Cell.ROUTE.value:  # 5
+                    output += f"{y_color}  {reset}"
             output += "\n"
         print(output)
         sleep(sleep_time)
 
         return None
+
+    def solve_maze(self) -> None:
+        """
+        Finding the shortest path in a maze.
+        """
+
+        start = (self._entry_point[0] * 2 + 1, self._entry_point[1] * 2 + 1)
+        end = (self._exit_point[0] * 2 + 1, self._exit_point[1] * 2 + 1)
+        route = {}
+        q = deque([start])
+        while q:
+            current = q.popleft()
+            if current == end:
+                x, y = route[end]
+                while (x, y) != start:
+                    self._grid[y][x] = 5
+                    x, y = route[(x, y)]
+                self._print_maze()
+                break
+            x, y = current
+            for x, y in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
+                if self._grid[y][x] in {0, 3} and (x, y) not in route:
+                    q.append((x, y))
+                    route[(x, y)] = current
 
     def _build_outer_walls(self) -> None:
         """
@@ -174,7 +211,7 @@ class MazeGenerator:
             [1, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 0, 1, 1, 1],
             [0, 0, 1, 0, 1, 0, 0],
-            [0, 0, 1, 0, 1, 1, 1]
+            [0, 0, 1, 0, 1, 1, 1],
         ]
 
         # 42スタンプ開始セル(切り捨て、左・上寄り)
@@ -190,9 +227,14 @@ class MazeGenerator:
 
         # 42スタンプの周囲7マス
         surrounding_offsets = [
-            (-1, -1), (-1, 0), (-1, 1),
-            (0, -1), (0, 1),
-            (1, -1), (1, 0), (1, 1)
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
         ]
 
         # 7 * 5 マスの内必要な場所だけスタンプ
@@ -216,17 +258,26 @@ class MazeGenerator:
         """Place pillars and knock down walls."""
         # 追加で棒倒しをする箇所の、42スタンプの左上からの相対座標
         target_pillars = [
-            (4, 0), (6, 0), (4, 2), (6, 2), # 42の4の上の部分
-            (0, 8), (2, 8), (0, 10), (2, 10), # 42の4の右下の部分
-            (6, 10), # 42の4の右下
-            (14, 10) # 42の2の右下
+            (4, 0),
+            (6, 0),
+            (4, 2),
+            (6, 2),  # 42の4の上の部分
+            (0, 8),
+            (2, 8),
+            (0, 10),
+            (2, 10),  # 42の4の右下の部分
+            (6, 10),  # 42の4の右下
+            (14, 10),  # 42の2の右下
         ]
         for y in range(2, self._h_grid - 1, 2):
             for x in range(2, self._w_grid - 1, 2):
                 # 42スタンプ周りの処理
                 if self._has_ft:
                     # 追加で棒倒しをする箇所以外スキップ
-                    if self._ft_min_x <= x <= self._ft_max_x and self._ft_min_y <= y <= self._ft_max_y:
+                    if (
+                        self._ft_min_x <= x <= self._ft_max_x
+                        and self._ft_min_y <= y <= self._ft_max_y
+                    ):
                         rel_x = x - self._ft_min_x
                         rel_y = y - self._ft_min_y
                         if (rel_x, rel_y) not in target_pillars:
@@ -246,7 +297,12 @@ class MazeGenerator:
                 # 一番上の行のそれ以外は下右上(SEN)
                 elif y == 2:
                     directions = [(0, 1), (1, 0), (0, -1)]
+<<<<<<< HEAD
                 #一番左の列の上記以外は左下右(WSE)
+=======
+
+                # 一番左の列の上記以外は左下右(WSE)
+>>>>>>> c1c7cd251b4b691c1a8297620e54bb4b9ec7a902
                 elif x == 2:
                     directions = [(-1, 0), (0, 1), (1, 0)]
                 # それ以外は下右(SE)
@@ -258,7 +314,6 @@ class MazeGenerator:
                 self._grid[y + dy][x + dx] = Cell.WALL.value
                 self._print_maze()
         return None
-
 
     def get_grid(self) -> list[list[int]]:
         """
@@ -277,6 +332,7 @@ class MazeGenerator:
                 grid_y = y * 2 + 1
                 cell_value = 0
 
+<<<<<<< HEAD
                 if self._grid[grid_y][grid_x - 1] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
                     cell_value |= 8
                 if self._grid[grid_y + 1][grid_x] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
@@ -284,6 +340,27 @@ class MazeGenerator:
                 if self._grid[grid_y][grid_x + 1] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
                     cell_value |= 2
                 if self._grid[grid_y - 1][grid_x] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
+=======
+                if self._grid[grid_y][grid_x - 1] in (
+                    Cell.Wall.value,
+                    Cell.FOURTY_TWO.value,
+                ):
+                    cell_value |= 8
+                if self._grid[grid_y + 1][grid_x] in (
+                    Cell.Wall.value,
+                    Cell.FOURTY_TWO.value,
+                ):
+                    cell_value |= 4
+                if self._grid[grid_y][grid_x + 1] in (
+                    Cell.Wall.value,
+                    Cell.FOURTY_TWO.value,
+                ):
+                    cell_value |= 2
+                if self._grid[grid_y - 1][grid_x] in (
+                    Cell.Wall.value,
+                    Cell.FOURTY_TWO.value,
+                ):
+>>>>>>> c1c7cd251b4b691c1a8297620e54bb4b9ec7a902
                     cell_value |= 1
                 str_line += f"{cell_value:X}"
 
