@@ -149,6 +149,7 @@ class MazeGenerator:
             output += "\n"
         print(output)
         sleep(sleep_time)
+
         return None
 
     def _build_outer_walls(self) -> None:
@@ -242,15 +243,12 @@ class MazeGenerator:
                 # 一番上の行の一番左は左下右上(WSEN)
                 if y == 2 and x == 2:
                     directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-
                 # 一番上の行のそれ以外は下右上(SEN)
                 elif y == 2:
                     directions = [(0, 1), (1, 0), (0, -1)]
-
                 #一番左の列の上記以外は左下右(WSE)
                 elif x == 2:
                     directions = [(-1, 0), (0, 1), (1, 0)]
-
                 # それ以外は下右(SE)
                 else:
                     directions = [(0, 1), (1, 0)]
@@ -279,16 +277,17 @@ class MazeGenerator:
                 grid_y = y * 2 + 1
                 cell_value = 0
 
-                if self._grid[grid_y][grid_x - 1] in (Cell.Wall.value, Cell.FOURTY_TWO.value):
+                if self._grid[grid_y][grid_x - 1] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
                     cell_value |= 8
-                if self._grid[grid_y + 1][grid_x] in (Cell.Wall.value, Cell.FOURTY_TWO.value):
+                if self._grid[grid_y + 1][grid_x] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
                     cell_value |= 4
-                if self._grid[grid_y][grid_x + 1] in (Cell.Wall.value, Cell.FOURTY_TWO.value):
+                if self._grid[grid_y][grid_x + 1] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
                     cell_value |= 2
-                if self._grid[grid_y - 1][grid_x] in (Cell.Wall.value, Cell.FOURTY_TWO.value):
+                if self._grid[grid_y - 1][grid_x] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
                     cell_value |= 1
                 str_line += f"{cell_value:X}"
 
             hex_grid.append(str_line)
 
         return hex_grid
+
