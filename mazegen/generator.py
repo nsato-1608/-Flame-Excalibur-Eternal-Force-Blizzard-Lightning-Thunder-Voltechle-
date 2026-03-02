@@ -279,30 +279,59 @@ class MazeGenerator:
                 self._print_maze()
         return None
 
-    def solve_maze(self) -> None:
+    def solve_maze(self) -> str:
         """
         Finding the shortest path in a maze.
+
+        Returns:
+            str: The shortest path represented by 'N', 'E', 'S', 'W'.
         """
 
         start = (self._entry_point[0] * 2 + 1, self._entry_point[1] * 2 + 1)
         end = (self._exit_point[0] * 2 + 1, self._exit_point[1] * 2 + 1)
-        route = {}
+        route = {start: None}
         q = deque([start])
         self._print_maze(1)
         while q:
             current = q.popleft()
+
             if current == end:
+                path_coords = []
+                curr = end
+                while curr is not None:
+                    path_coords.append(curr)
+                    curr = route[curr]
+
+                path_coords.reverse()
+
+                path_str = ""
+
+                for i in range(0, len(path_coords) - 1, 2):
+                    cx, cy = path_coords[i]
+                    nx, ny = path_coords[i + 2]
+
+                    if nx > cx:
+                        path_str += "E"
+                    elif nx < cx:
+                        path_str += "W"
+                    elif ny > cy:
+                        path_str += "S"
+                    elif ny < cy:
+                        path_str += "N"
+
                 x, y = route[end]
                 while (x, y) != start:
                     self._grid[y][x] = 5
                     x, y = route[(x, y)]
                 self._print_maze()
-                break
-            x, y = current
-            for x, y in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
-                if self._grid[y][x] in {0, 3} and (x, y) not in route:
-                    q.append((x, y))
-                    route[(x, y)] = current
+                return path_str
+
+            cx, cy = current
+            for nx, ny in ((cx - 1, cy), (cx + 1, cy), (cx, cy - 1), (cx, cy + 1)):
+                if self._grid[ny][nx] in {0, 3} and (nx, ny) not in route:
+                    q.append((nx, ny))
+                    route[(nx, ny)] = current
+        return ""
 
     def get_grid(self) -> list[list[int]]:
         """

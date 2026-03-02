@@ -53,7 +53,9 @@ def main() -> None:
         )
         # 迷路生成、出力
         generator.generate()
-        generator.solve_maze()
+
+        # 最短経路受け取り
+        path_str = generator.solve_maze()
 
         # 16進数の文字列リスト受け取り
         hex_grid = generator.get_hex_grid()
@@ -63,7 +65,8 @@ def main() -> None:
             file_path=config.output_file,
             hex_grid=hex_grid,
             entry_point=config.entry_point,
-            exit_point=config.exit_point
+            exit_point=config.exit_point,
+            path_str=path_str
                 )
 
     except (ValueError, TypeError, FileNotFoundError) as e:
