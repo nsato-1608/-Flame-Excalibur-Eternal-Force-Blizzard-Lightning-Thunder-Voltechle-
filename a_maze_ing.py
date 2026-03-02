@@ -1,6 +1,7 @@
 from sys import argv, exit
 from mazegen.config import parse_config
 from mazegen.generator import MazeGenerator, Cell
+from time import sleep
 
 
 # "ESC[色コードm"の順番で色付け開始、ESC[0m で色付け終了

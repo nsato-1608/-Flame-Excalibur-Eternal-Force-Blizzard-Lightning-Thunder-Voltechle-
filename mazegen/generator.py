@@ -192,6 +192,11 @@ class MazeGenerator:
                 # 柱の埋め込み
                 self._grid[y][x] = Cell.WALL.value
 
+                # perfectじゃない時は2割の確率で棒を倒さない
+                if not self._perfect:
+                    if random.random() > 0.8:
+                        continue
+
                 # 一番上の行の一番左は左下右上(WSEN)
                 if y == 2 and x == 2:
                     directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
