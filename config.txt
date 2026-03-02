@@ -8,15 +8,10 @@
 # PERFECT 完全迷路フラグ(Falseで複数ルートになる)
 # SEED 乱数調整
 
-WIDTH=15
-HEIGHT=10
+WIDTH=20
+HEIGHT=15
 ENTRY=0,0
-EXIT=14,9
+EXIT=19,14
 OUTPUT_FILE=maze.txt
-<<<<<<< HEAD
 PERFECT=True
-SEED=3
-=======
-PERFECT=Flase
 SEED=42
->>>>>>> c1c7cd251b4b691c1a8297620e54bb4b9ec7a902

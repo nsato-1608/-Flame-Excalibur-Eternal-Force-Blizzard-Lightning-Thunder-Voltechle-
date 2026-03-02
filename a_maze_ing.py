@@ -1,6 +1,7 @@
 from sys import argv, stderr, exit
 from mazegen.config import parse_config
-from mazegen.generator import MazeGenerator, Cell
+from mazegen.generator import MazeGenerator
+
 
 def save_to_file(
         file_path: str,
@@ -8,7 +9,7 @@ def save_to_file(
         entry_point: tuple[int, int],
         exit_point: tuple[int, int],
         path_str: str = "WIP"
-    ) -> None:
+        ) -> None:
 
     try:
         with open(file_path, "w", encoding="utf-8") as f:
@@ -22,7 +23,9 @@ def save_to_file(
             f.write(f"{path_str}\n")
 
     except OSError as e:
-        print(f"Error: Failed to save the maze to '{file_path}'. Details: {e}", file=stderr)
+        print(f"Error: Failed to save the maze to '{file_path}'."
+              f"Details: {e}", file=stderr)
+
 
 def main() -> None:
     """
@@ -30,7 +33,7 @@ def main() -> None:
     """
     if len(argv) != 2:
         print("Usage: python3 a_maze_ing.py <config_file>.txt")
-        sys.exit(1)
+        exit(1)
 
     config_file = argv[1]
     try:
@@ -50,7 +53,8 @@ def main() -> None:
         )
         # 迷路生成、出力
         generator.generate()
-<<<<<<< HEAD
+        generator.solve_maze()
+
         # 16進数の文字列リスト受け取り
         hex_grid = generator.get_hex_grid()
 
@@ -61,9 +65,6 @@ def main() -> None:
             entry_point=config.entry_point,
             exit_point=config.exit_point
                 )
-=======
-        generator.solve_maze()
->>>>>>> c1c7cd251b4b691c1a8297620e54bb4b9ec7a902
 
     except (ValueError, TypeError, FileNotFoundError) as e:
         print(f"ERROR: {e}", file=stderr)
@@ -74,4 +75,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
