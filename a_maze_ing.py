@@ -25,10 +25,11 @@ def main() -> None:
             entry_point=config.entry_point,
             exit_point=config.exit_point,
             perfect=config.perfect,
-            seed=config.seed
+            seed=config.seed,
         )
         # 迷路生成、出力
         generator.generate()
+        generator.solve_maze()
 
     except (ValueError, TypeError, FileNotFoundError) as e:
         print(f"ERROR: {e}")
