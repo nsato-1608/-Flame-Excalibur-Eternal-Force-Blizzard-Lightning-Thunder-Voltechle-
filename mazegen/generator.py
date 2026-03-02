@@ -297,12 +297,7 @@ class MazeGenerator:
                 # 一番上の行のそれ以外は下右上(SEN)
                 elif y == 2:
                     directions = [(0, 1), (1, 0), (0, -1)]
-<<<<<<< HEAD
-                #一番左の列の上記以外は左下右(WSE)
-=======
-
                 # 一番左の列の上記以外は左下右(WSE)
->>>>>>> c1c7cd251b4b691c1a8297620e54bb4b9ec7a902
                 elif x == 2:
                     directions = [(-1, 0), (0, 1), (1, 0)]
                 # それ以外は下右(SE)
@@ -332,15 +327,6 @@ class MazeGenerator:
                 grid_y = y * 2 + 1
                 cell_value = 0
 
-<<<<<<< HEAD
-                if self._grid[grid_y][grid_x - 1] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
-                    cell_value |= 8
-                if self._grid[grid_y + 1][grid_x] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
-                    cell_value |= 4
-                if self._grid[grid_y][grid_x + 1] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
-                    cell_value |= 2
-                if self._grid[grid_y - 1][grid_x] in (Cell.WALL.value, Cell.FOURTY_TWO.value):
-=======
                 if self._grid[grid_y][grid_x - 1] in (
                     Cell.Wall.value,
                     Cell.FOURTY_TWO.value,
@@ -360,7 +346,6 @@ class MazeGenerator:
                     Cell.Wall.value,
                     Cell.FOURTY_TWO.value,
                 ):
->>>>>>> c1c7cd251b4b691c1a8297620e54bb4b9ec7a902
                     cell_value |= 1
                 str_line += f"{cell_value:X}"
 
