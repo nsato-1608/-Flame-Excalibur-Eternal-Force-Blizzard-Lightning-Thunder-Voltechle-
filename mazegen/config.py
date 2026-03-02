@@ -20,6 +20,7 @@ class MazeConfig:
     exit_point: tuple[int, int]
     output_file: str
     perfect: bool
+    seed: int
 
 
 def parse_config(file_path: str) -> MazeConfig:
@@ -55,7 +56,8 @@ def parse_config(file_path: str) -> MazeConfig:
             "entry_point": lambda val: tuple(int(v) for v in val.split(',', 1)),
             "exit_point": lambda val: tuple(int(v) for v in val.split(',', 1)),
             "output_file": str,
-            "perfect": lambda val: {"True": True, "False": False}.get(val)
+            "perfect": lambda val: {"True": True, "False": False}.get(val),
+            "seed": int
         }.items()
     })
 
