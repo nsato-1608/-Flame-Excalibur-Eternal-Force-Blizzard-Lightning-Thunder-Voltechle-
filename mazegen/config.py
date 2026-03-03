@@ -21,6 +21,7 @@ class MazeConfig:
     output_file: str
     perfect: bool
     seed: int
+    pattern: bool
 
 
 def parse_config(file_path: str) -> MazeConfig:
@@ -47,20 +48,29 @@ def parse_config(file_path: str) -> MazeConfig:
                 and "=" in line)
             for key, value in [line.strip().split("=", 1)]
         }
+    from typing import Callable
+    def strtobool() -> Callable[[str], bool | None]:
+        return lambda val: {"True": True, "False": False}.get(val)
     return MazeConfig(**{
         key: ope(config_data[{
-            "entry_point": "entry",
-            "exit_point": "exit",
-        }.get(key, key).upper()])
-        for key, ope in {
-            "width": int,
-            "height": int,
-            "entry_point": lambda val:
-                tuple(int(v) for v in val.split(',', 1)),
-            "exit_point": lambda val:
-                tuple(int(v) for v in val.split(',', 1)),
-            "output_file": str,
-            "perfect": lambda val: {"True": True, "False": False}.get(val),
-            "seed": int
-        }.items()
-    })
+                "entry_point": "entry",
+                "exit_point": "exit",
+            }.get(key, key).upper()])
+            for key, ope in {
+                "width": int,
+                "height": int,
+                "entry_point": lambda val:
+                    tuple(int(v) for v in val.split(',', 1)),
+                "exit_point": lambda val:
+                    tuple(int(v) for v in val.split(',', 1)),
+                "output_file": str,
+                "perfect": strtobool()
+            }.items()
+        }, **{
+            key: ope(config_data.get(key.upper(), default))
+            for key, (ope, default) in {
+                "seed": (int, 0),
+                "pattern": (strtobool(), "True")
+            }.items()
+        }
+    )

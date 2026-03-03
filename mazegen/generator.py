@@ -1,20 +1,42 @@
+import os
 import random
+from collections import deque
 from enum import Enum
 from time import sleep
-from collections import deque
-
 
 # "ESC[色コードm"の順番で色付け開始、ESC[0m で色付け終了
 # ESC は16進数で0x1b 8進数で033 10進数で27 の文字コード
 # 1:Bold, 2:Dim, 3:Italic, 4:Underline, 5, 6: 点滅, 7:Invert
 # 文字(START, GOAL)はフロント30~か90~, 空白(ROAD, WALL, FOURTY_TWO)はバック40~か100~
-r_color = "\33[100m"  # 黒
-w_color = "\33[107m"  # 白
-s_color = "\33[1;6;91;102m"  # 赤文字、緑背景
-y_color = "\33[103m"  # 黄
-g_color = "\33[1;6;91;102m"  # 赤文字、緑背景
-ft_color = "\33[105m"  # マゼンダ
-reset = "\33[0m"
+COLOR_SCHEMES = {
+        0: {
+            "r_color": "\33[100m",
+            "w_color": "\33[107m",  # 白
+            "s_color": "\33[1;6;91;102m",  # 赤文字、緑背景
+            "y_color": "\33[103m",  # 黄
+            "g_color": "\33[1;6;91;102m",  # 赤文字、緑背景
+            "ft_color": "\33[105m",  # マゼンダ
+            "reset": "\33[0m"
+    },
+        1: {
+            "r_color": "\33[107m",  # 白
+            "w_color": "\33[100m",  # 黒
+            "s_color": "\33[1;6;91;102m",  # 赤文字、緑背景
+            "y_color": "\33[103m",  # 黄
+            "g_color": "\33[1;6;91;102m",  # 赤文字、緑背景
+            "ft_color": "\33[105m",  # マゼンダ
+            "reset": "\33[0m"
+    },
+        2: {
+            "r_color": "\33[105m",
+            "w_color": "\33[106m",
+            "s_color": "\33[1;6;91;100m",
+            "y_color": "\33[102m",
+            "g_color": "\33[1;6;91;100m",
+            "ft_color": "\33[103m",
+            "reset": "\33[0m"
+    }
+}
 
 
 class Cell(Enum):
@@ -57,8 +79,9 @@ class MazeGenerator:
         height: int,
         entry_point: tuple[int, int],
         exit_point: tuple[int, int],
-        perfect: bool = False,
-        seed: int | None = None,
+        perfect: bool,
+        seed: int,
+        pattern: bool,
     ) -> None:
         """Initialize the MazeGenerator.
 
@@ -76,6 +99,7 @@ class MazeGenerator:
         self._exit_point = exit_point
         self._perfect = perfect
         self._seed = seed
+        self._pattern = pattern
 
         # 横と縦の配列の長さ
         self._w_grid = width * 2 + 1
@@ -104,11 +128,11 @@ class MazeGenerator:
             random.seed(self._seed)
 
         # 全体のプリント
-        self._print_maze(1)
+        self.print_maze(1)
 
         # 周りのWALL埋め込み、外壁のプリント
         self._build_outer_walls()
-        self._print_maze(1)
+        self.print_maze(1)
 
         # ex, ey: ENTRYの座標
         ex, ey = self._entry_point
@@ -119,12 +143,12 @@ class MazeGenerator:
         self._grid[gy * 2 + 1][gx * 2 + 1] = Cell.EXIT.value
 
         # ENTRYとEXITのプリント
-        self._print_maze(1)
+        self.print_maze(1)
 
         # ロゴの上下左右に+ 1マス分あれば中心に42スタンプを埋め込み
-        if self._width >= 9 and self._height >= 7:
+        if self._width >= 9 and self._height >= 7 and self._pattern:
             self._build_fourty_two()
-            self._print_maze(1)
+            self.print_maze(1)
 
         # 柱の埋め込み→棒倒し！
         self._pillars_and_knock()
@@ -133,22 +157,35 @@ class MazeGenerator:
 
     print_init = False
 
-    def _print_maze(self, sleep_time: float = 0.05) -> None:
+    def print_maze(
+            self, sleep_time: float = 0.05,
+            show_path: bool = False,
+            color_id: int = 0) -> None:
         """
         Print the maze grid to the console.
 
         Args:
             maze_grid (list[list[int]]): The maze grid to print.
         """
+        colors = COLOR_SCHEMES.get(color_id, COLOR_SCHEMES[0])
+        r_color = colors["r_color"]
+        w_color = colors["w_color"]
+        s_color = colors["s_color"]
+        y_color = colors["y_color"]
+        g_color = colors["g_color"]
+        ft_color = colors["ft_color"]
+        reset = colors["reset"]
+
         if not self.print_init:
-            print("\x1b[2J", end="")
-            print("\x1b[H", end="")
-            print("\x1b[s", end="")
+            print("\x1b[2J\x1b[H\x1b[s", end="")
             self.print_init = True
-        output = "\x1b[u"
+        output = "\x1b[H\x1b[0J"
         for row in self._grid:
             for cell in row:
-                if cell == Cell.ROAD.value:
+                if (
+                    cell == Cell.ROAD.value or
+                    (cell == Cell.ROUTE.value and show_path)
+                ):
                     output += f"{r_color}  {reset}"
                 elif cell == Cell.WALL.value:
                     output += f"{w_color}  {reset}"
@@ -161,6 +198,9 @@ class MazeGenerator:
                 elif cell == Cell.ROUTE.value:
                     output += f"{y_color}  {reset}"
             output += "\n"
+#        if os.get_terminal_size().lines < output.count('\n'):
+#            output = "\x1b[H\x1b[2J\n\n\x1b[s" + output
+
         print(output)
         sleep(sleep_time)
 
@@ -276,7 +316,7 @@ class MazeGenerator:
                 # 棒倒し!
                 dx, dy = random.choice(directions)
                 self._grid[y + dy][x + dx] = Cell.WALL.value
-                self._print_maze()
+                self.print_maze()
         return None
 
     def solve_maze(self) -> str:
@@ -291,7 +331,7 @@ class MazeGenerator:
         end = (self._exit_point[0] * 2 + 1, self._exit_point[1] * 2 + 1)
         route = {start: None}
         q = deque([start])
-        self._print_maze(1)
+        self.print_maze(1)
         while q:
             current = q.popleft()
 
@@ -323,7 +363,6 @@ class MazeGenerator:
                 while (x, y) != start:
                     self._grid[y][x] = 5
                     x, y = route[(x, y)]
-                self._print_maze()
                 return path_str
 
             cx, cy = current
