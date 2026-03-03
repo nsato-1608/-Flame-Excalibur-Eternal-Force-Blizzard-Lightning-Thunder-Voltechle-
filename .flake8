@@ -1,0 +1,7 @@
+# flake8で確認しない除外ファイル
+[flake8]
+exclude =
+	venv,
+	.venv,
+	__pycache__,
+	.git
