@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from typing import get_origin
 
 @dataclass
 class MazeConfig:
@@ -22,6 +22,14 @@ class MazeConfig:
     perfect: bool
     seed: int
     pattern: bool
+
+    def copy(self):
+        return MazeConfig(**vars(self))
+
+    def validate(self) -> None:
+        for name, t in self.__annotations__.items():
+            if type(vars(self)[name]) is not (get_origin(t) or t):
+                raise TypeError(f"Config value {name} is invalid")
 
 
 def parse_config(file_path: str) -> MazeConfig:
@@ -48,28 +56,35 @@ def parse_config(file_path: str) -> MazeConfig:
                 and "=" in line)
             for key, value in [line.strip().split("=", 1)]
         }
+
     from typing import Callable
     def strtobool() -> Callable[[str], bool | None]:
         return lambda val: {"True": True, "False": False}.get(val)
+    def uint(s: str) -> int:
+        val = int(s)
+        if val < 0:
+            raise ValueError("Config value cannnot be negative")
+        return val
+
     return MazeConfig(**{
         key: ope(config_data[{
                 "entry_point": "entry",
                 "exit_point": "exit",
             }.get(key, key).upper()])
             for key, ope in {
-                "width": int,
-                "height": int,
+                "width": uint,
+                "height": uint,
                 "entry_point": lambda val:
-                    tuple(int(v) for v in val.split(',', 1)),
+                    tuple(uint(v) for v in val.split(',', 1)),
                 "exit_point": lambda val:
-                    tuple(int(v) for v in val.split(',', 1)),
+                    tuple(uint(v) for v in val.split(',', 1)),
                 "output_file": str,
                 "perfect": strtobool()
             }.items()
         }, **{
             key: ope(config_data.get(key.upper(), default))
             for key, (ope, default) in {
-                "seed": (int, 0),
+                "seed": (uint, 0),
                 "pattern": (strtobool(), "True")
             }.items()
         }

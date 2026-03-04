@@ -1,5 +1,6 @@
 import os
 import random
+from sys import stderr
 from collections import deque
 from enum import Enum
 from time import sleep
@@ -127,13 +128,6 @@ class MazeGenerator:
         if self._seed > 0:
             random.seed(self._seed)
 
-        # 全体のプリント
-        self.print_maze(1)
-
-        # 周りのWALL埋め込み、外壁のプリント
-        self._build_outer_walls()
-        self.print_maze(1)
-
         # ex, ey: ENTRYの座標
         ex, ey = self._entry_point
         self._grid[ey * 2 + 1][ex * 2 + 1] = Cell.ENTRY.value
@@ -142,7 +136,10 @@ class MazeGenerator:
         gx, gy = self._exit_point
         self._grid[gy * 2 + 1][gx * 2 + 1] = Cell.EXIT.value
 
-        # ENTRYとEXITのプリント
+        # 周りのWALL埋め込み、外壁のプリント
+        self._build_outer_walls()
+
+        # 全体のプリント
         self.print_maze(1)
 
         # ロゴの上下左右に+ 1マス分あれば中心に42スタンプを埋め込み
@@ -312,6 +309,14 @@ class MazeGenerator:
                 # それ以外は下右(SE)
                 else:
                     directions = [(0, 1), (1, 0)]
+
+
+                directions = [(0, 1), (1, 0)]
+                if x == 2:
+                    directions.append((-1, 0))
+                if y == 2:
+                    directions.append((0, -1))
+
 
                 # 棒倒し!
                 dx, dy = random.choice(directions)
