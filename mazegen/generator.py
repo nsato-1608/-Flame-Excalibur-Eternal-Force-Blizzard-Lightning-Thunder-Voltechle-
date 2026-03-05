@@ -1,6 +1,5 @@
-import os
+"""迷路生成するモジュール."""
 import random
-from sys import stderr
 from collections import deque
 from enum import Enum
 from time import sleep
@@ -10,47 +9,47 @@ from time import sleep
 # 1:Bold, 2:Dim, 3:Italic, 4:Underline, 5, 6: 点滅, 7:Invert
 # 文字(START, GOAL)はフロント30~か90~, 空白(ROAD, WALL, FOURTY_TWO)はバック40~か100~
 COLOR_SCHEMES = {
-        0: {
-            "r_color": "\33[100m",
-            "w_color": "\33[107m",  # 白
-            "s_color": "\33[1;6;91;102m",  # 赤文字、緑背景
-            "y_color": "\33[103m",  # 黄
-            "g_color": "\33[1;6;91;102m",  # 赤文字、緑背景
-            "ft_color": "\33[105m",  # マゼンダ
-            "reset": "\33[0m"
+    0: {
+        "r_color": "\33[100m",
+        "w_color": "\33[107m",  # 白
+        "s_color": "\33[1;6;91;102m",  # 赤文字、緑背景
+        "y_color": "\33[103m",  # 黄
+        "g_color": "\33[1;6;91;102m",  # 赤文字、緑背景
+        "ft_color": "\33[105m",  # マゼンダ
+        "reset": "\33[0m"
     },
-        1: {
-            "r_color": "\33[107m",  # 白
-            "w_color": "\33[100m",  # 黒
-            "s_color": "\33[1;6;91;102m",  # 赤文字、緑背景
-            "y_color": "\33[103m",  # 黄
-            "g_color": "\33[1;6;91;102m",  # 赤文字、緑背景
-            "ft_color": "\33[105m",  # マゼンダ
-            "reset": "\33[0m"
+    1: {
+        "r_color": "\33[107m",  # 白
+        "w_color": "\33[100m",  # 黒
+        "s_color": "\33[1;6;91;102m",  # 赤文字、緑背景
+        "y_color": "\33[103m",  # 黄
+        "g_color": "\33[1;6;91;102m",  # 赤文字、緑背景
+        "ft_color": "\33[105m",  # マゼンダ
+        "reset": "\33[0m"
     },
-        2: {
-            "r_color": "\33[105m",
-            "w_color": "\33[106m",
-            "s_color": "\33[1;6;91;100m",
-            "y_color": "\33[102m",
-            "g_color": "\33[1;6;91;100m",
-            "ft_color": "\33[103m",
-            "reset": "\33[0m"
+    2: {
+        "r_color": "\33[105m",
+        "w_color": "\33[106m",
+        "s_color": "\33[1;6;91;100m",
+        "y_color": "\33[102m",
+        "g_color": "\33[1;6;91;100m",
+        "ft_color": "\33[103m",
+        "reset": "\33[0m"
     }
 }
 
 
 class Cell(Enum):
-    """The cell type of the maze.
+    """迷路のセルの種類を設定.
 
-    A class for managing numbers stored in an array.
+    配列に格納された数値を管理するためのクラス.
 
     Attributes:
-        ROAD (int):road in the maze.
-        WALL (int):wall in the maze.
-        ENTRY (int):entry point in the maze.
-        EXIT (int):exit point in the maze.
-        FOURTY_TWO (int):42 point in the maze.
+        ROAD (int):迷路の通路.
+        WALL (int):迷路の壁.
+        ENTRY (int):迷路のスタート位置.
+        EXIT (int):迷路のゴール位置.
+        FOURTY_TWO (int):42ロゴの位置.
     """
 
     ROAD = 0
@@ -62,16 +61,16 @@ class Cell(Enum):
 
 
 class MazeGenerator:
-    """A class for generating a maze.
+    """迷路を生成するクラス.
 
     Attributes:
-        _width (int):width of the maze.
-        _height (int):height of the maze.
-        _entry_point (tuple[int, int]):entry point of the maze.
-        _exit_point (tuple[int, int]):exit point of the maze.
-        _seed (int | None):seed for random number generation.
-        _grid (list[list[int]]):grid of the maze.
-        _perfect (bool):check perfect of the maze.
+        _width (int):迷路の幅.
+        _height (int):迷路の高さ.
+        _entry_point (tuple[int, int]):迷路のスタート座標.
+        _exit_point (tuple[int, int]):迷路のゴール座標.
+        _seed (int | None):迷路をランダムに生成するための値.
+        _grid (list[list[int]]):迷路のグリッド.
+        _perfect (bool):完全迷路か不完全迷路を切り替えるための値.
     """
 
     def __init__(
@@ -84,15 +83,16 @@ class MazeGenerator:
         seed: int,
         pattern: bool,
     ) -> None:
-        """Initialize the MazeGenerator.
+        """MazeGeneratorを初期化する.
 
         Args:
-            width (int):Number of cells in the width of the maze.
-            height (int):Number of cells in the height of the maze.
-            entry_point (tuple[int, int]):entry point of the maze.
-            exit_point (tuple[int, int]):exit point of the maze.
-            perfect (bool):flag of the perfect maze.
-            seed (int | None):seed for random number generation.
+            width (int):迷路の幅.
+            height (int):迷路の高さ.
+            entry_point (tuple[int, int]):迷路のスタート座標.
+            exit_point (tuple[int, int]):迷路のゴール座標.
+            perfect (bool):完全迷路か不完全迷路を切り替えるための値.
+            seed (int | None):迷路をランダムに生成するための値.
+            pattern (bool): 42ロゴの生成を切り替えるための値.
         """
         self._width = width
         self._height = height
@@ -120,93 +120,62 @@ class MazeGenerator:
             for _ in range(self._h_grid)
         ]
 
-        return None
-
-    def generate(self) -> None:
-        """Generate a maze."""
+    def generate(
+        self,
+        sleep_anime: bool = False,
+        print_flag: bool = False
+    ) -> None:
+        """迷路を生成する."""
         # シード値(再現性の確保)
         if self._seed > 0:
             random.seed(self._seed)
 
         # ex, ey: ENTRYの座標
         ex, ey = self._entry_point
-        self._grid[ey * 2 + 1][ex * 2 + 1] = Cell.ENTRY.value
-
-        # gx, gy: EXIT(ゴール)の座標
+        # gx, gy: EXIT(ゴール)の座標(範囲外アクセスの可能性)
         gx, gy = self._exit_point
+        # ENTRY_POINT, EXIT_POINTの有効値チェック
+        if ex == gx and ey == gy:
+            raise ValueError(
+                    "ENTRY_POINT and EXIT_POINT are at the same coordinates"
+            )
+        if ex < 0 or ey < 0:
+            raise ValueError("ENTRY_POINT is not minus value")
+        if gx < 0 or gy < 0:
+            raise ValueError("EXIT_POINT is not minus value")
+
+        # ENTRY, EXIT埋め込み
+        self._grid[ey * 2 + 1][ex * 2 + 1] = Cell.ENTRY.value
         self._grid[gy * 2 + 1][gx * 2 + 1] = Cell.EXIT.value
 
-        # 周りのWALL埋め込み、外壁のプリント
-        self._build_outer_walls()
-
-        # 全体のプリント
-        self.print_maze(1)
-
+        # 周りのWALL埋め込み
+        self._build_outer_walls(
+            sleep_anime=sleep_anime,
+            print_flag=print_flag
+        )
         # ロゴの上下左右に+ 1マス分あれば中心に42スタンプを埋め込み
         if self._width >= 9 and self._height >= 7 and self._pattern:
-            self._build_fourty_two()
-            self.print_maze(1)
-
+            self._build_fourty_two(
+                sleep_anime=sleep_anime,
+                print_flag=print_flag
+            )
         # 柱の埋め込み→棒倒し！
-        self._pillars_and_knock()
-
+        self._pillars_and_knock(
+            sleep_anime=sleep_anime,
+            print_flag=print_flag
+        )
         return None
 
-    print_init = False
-
-    def print_maze(
-            self, sleep_time: float = 0.05,
-            show_path: bool = False,
-            color_id: int = 0) -> None:
-        """
-        Print the maze grid to the console.
-
-        Args:
-            maze_grid (list[list[int]]): The maze grid to print.
-        """
-        colors = COLOR_SCHEMES.get(color_id, COLOR_SCHEMES[0])
-        r_color = colors["r_color"]
-        w_color = colors["w_color"]
-        s_color = colors["s_color"]
-        y_color = colors["y_color"]
-        g_color = colors["g_color"]
-        ft_color = colors["ft_color"]
-        reset = colors["reset"]
-
-        if not self.print_init:
-            print("\x1b[2J\x1b[H\x1b[s", end="")
-            self.print_init = True
-        output = "\x1b[H\x1b[0J"
-        for row in self._grid:
-            for cell in row:
-                if (
-                    cell == Cell.ROAD.value or
-                    (cell == Cell.ROUTE.value and show_path)
-                ):
-                    output += f"{r_color}  {reset}"
-                elif cell == Cell.WALL.value:
-                    output += f"{w_color}  {reset}"
-                elif cell == Cell.ENTRY.value:
-                    output += f"{s_color}S {reset}"
-                elif cell == Cell.EXIT.value:
-                    output += f"{g_color}G {reset}"
-                elif cell == Cell.FOURTY_TWO.value:
-                    output += f"{ft_color}  {reset}"
-                elif cell == Cell.ROUTE.value:
-                    output += f"{y_color}  {reset}"
-            output += "\n"
-#        if os.get_terminal_size().lines < output.count('\n'):
-#            output = "\x1b[H\x1b[2J\n\n\x1b[s" + output
-
-        print(output)
-        sleep(sleep_time)
-
-        return None
-
-    def _build_outer_walls(self) -> None:
-        """
-        Build outer walls of the maze.
-        """
+    def _build_outer_walls(
+        self,
+        sleep_anime: bool = False,
+        print_flag: bool = False
+    ) -> None:
+        """迷路の外壁を生成する."""
+        # アニメーション処理
+        sleep_time = 0.0
+        if sleep_anime:
+            sleep_time = 1.0
         # 縦配列(y) * 横配列(x) 分ループ、上下左右の辺にWALL埋め込み
         for y in range(0, self._h_grid):
             for x in range(0, self._w_grid):
@@ -216,12 +185,21 @@ class MazeGenerator:
                 ):
                     self._grid[y][x] = Cell.WALL.value
 
+        if print_flag:
+            self.print_maze(sleep_time)
         return None
 
-    def _build_fourty_two(self) -> None:
-        """
-        Build the number 42 in the maze.
-        """
+    def _build_fourty_two(
+        self,
+        sleep_anime: bool = False,
+        print_flag: bool = False
+    ) -> None:
+        """迷路の中に42ロゴを生成する."""
+        # アニメーション処理
+        sleep_time = 0.0
+        if sleep_anime:
+            sleep_time = 1.0
+
         # 42スタンプパターン
         ft_pattern = [
             [1, 0, 0, 0, 1, 1, 1],
@@ -264,10 +242,20 @@ class MazeGenerator:
                 for dy, dx in surrounding_offsets:
                     self._grid[sy + dy][sx + dx] = Cell.WALL.value
 
+        if print_flag:
+            self.print_maze(sleep_time)
         return None
 
-    def _pillars_and_knock(self) -> None:
-        """Place pillars and knock down walls."""
+    def _pillars_and_knock(
+        self, sleep_anime: bool = False,
+        print_flag: bool = False
+    ) -> None:
+        """棒倒し方のアルゴリズム."""
+        # アニメーション処理
+        sleep_time = 0.0
+        if sleep_anime:
+            sleep_time = 0.05
+
         # 追加で棒倒しをする箇所の、42スタンプの左上からの相対座標
         target_pillars = [
             (4, 0), (6, 0), (4, 2), (6, 2),  # 42の4の上の部分
@@ -275,6 +263,7 @@ class MazeGenerator:
             (6, 10),  # 42の4の右下
             (14, 10),  # 42の2の右下
         ]
+
         for y in range(2, self._h_grid - 1, 2):
             for x in range(2, self._w_grid - 1, 2):
                 # 42スタンプ周りの処理
@@ -289,6 +278,7 @@ class MazeGenerator:
                         if (rel_x, rel_y) not in target_pillars:
                             continue
 
+                # 基本処理
                 # 柱の埋め込み
                 self._grid[y][x] = Cell.WALL.value
 
@@ -297,55 +287,94 @@ class MazeGenerator:
                     if random.random() > 0.8:
                         continue
 
-                # 一番上の行の一番左は左下右上(WSEN)
-                if y == 2 and x == 2:
-                    directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-                # 一番上の行のそれ以外は下右上(SEN)
-                elif y == 2:
-                    directions = [(0, 1), (1, 0), (0, -1)]
-                # 一番左の列の上記以外は左下右(WSE)
-                elif x == 2:
-                    directions = [(-1, 0), (0, 1), (1, 0)]
-                # それ以外は下右(SE)
-                else:
-                    directions = [(0, 1), (1, 0)]
-
-
+                # 基本は右と下に倒す(SとE)
                 directions = [(0, 1), (1, 0)]
+                # 一番左なら左にも倒す(W)
                 if x == 2:
                     directions.append((-1, 0))
+                # 一番上なら上にも倒す(N)
                 if y == 2:
                     directions.append((0, -1))
-
 
                 # 棒倒し!
                 dx, dy = random.choice(directions)
                 self._grid[y + dy][x + dx] = Cell.WALL.value
-                self.print_maze()
+                if print_flag:
+                    self.print_maze(sleep_time)
+        return None
+
+    print_init = False
+
+    def print_maze(
+            self, sleep_time: float = 0.0,
+            show_path: bool = False,
+            color_id: int = 0) -> None:
+        """コンソールに迷路を出力する.
+
+        Args:
+            sleep_time (flat): プロセスの実行を遅らせるための値.
+            show_path (bool): ゴールまでの経路表示の切り替えをする値.
+            color_id (int): 迷路のカラープリセットを選ぶ値.
+            maze_grid (list[list[int]]): 出力するための迷路.
+        """
+        colors = COLOR_SCHEMES.get(color_id, COLOR_SCHEMES[0])
+        r_color = colors["r_color"]
+        w_color = colors["w_color"]
+        s_color = colors["s_color"]
+        y_color = colors["y_color"]
+        g_color = colors["g_color"]
+        ft_color = colors["ft_color"]
+        reset = colors["reset"]
+
+        if not self.print_init:
+            print("\x1b[2J\x1b[H\x1b[s", end="")
+            self.print_init = True
+        output = "\x1b[H\x1b[0J"
+        for row in self._grid:
+            for cell in row:
+                if (
+                    cell == Cell.ROAD.value or
+                    (cell == Cell.ROUTE.value and show_path)
+                ):
+                    output += f"{r_color}  {reset}"
+                elif cell == Cell.WALL.value:
+                    output += f"{w_color}  {reset}"
+                elif cell == Cell.ENTRY.value:
+                    output += f"{s_color}S {reset}"
+                elif cell == Cell.EXIT.value:
+                    output += f"{g_color}G {reset}"
+                elif cell == Cell.FOURTY_TWO.value:
+                    output += f"{ft_color}  {reset}"
+                elif cell == Cell.ROUTE.value:
+                    output += f"{y_color}  {reset}"
+            output += "\n"
+
+        print(output)
+        sleep(sleep_time)
+
         return None
 
     def solve_maze(self) -> str:
-        """
-        Finding the shortest path in a maze.
+        """幅優先探索でゴールまでの最短経路を求める.
 
         Returns:
-            str: The shortest path represented by 'N', 'E', 'S', 'W'.
+            str: ゴールまでの道筋を'N', 'E', 'S', 'W'で表す.
         """
-
         start = (self._entry_point[0] * 2 + 1, self._entry_point[1] * 2 + 1)
         end = (self._exit_point[0] * 2 + 1, self._exit_point[1] * 2 + 1)
-        route = {start: None}
+#        route = {start: None}
+        route: dict[tuple[int, int], tuple[int, int]] = {}
         q = deque([start])
-        self.print_maze(1)
+        # self.print_maze(1)
         while q:
             current = q.popleft()
 
             if current == end:
-                path_coords = []
+                path_coords = [end]
                 curr = end
-                while curr is not None:
-                    path_coords.append(curr)
+                while curr != start:
                     curr = route[curr]
+                    path_coords.append(curr)
 
                 path_coords.reverse()
 
@@ -371,20 +400,24 @@ class MazeGenerator:
                 return path_str
 
             cx, cy = current
-            for nx, ny in ((cx - 1, cy), (cx + 1, cy), (cx, cy - 1), (cx, cy + 1)):
+            for nx, ny in (
+                (cx - 1, cy),
+                (cx + 1, cy),
+                (cx, cy - 1),
+                (cx, cy + 1)
+            ):
                 if self._grid[ny][nx] in {0, 3} and (nx, ny) not in route:
                     q.append((nx, ny))
                     route[(nx, ny)] = current
         return ""
 
     def get_grid(self) -> list[list[int]]:
-        """
-        Get the grid of the maze.
-        """
+        """迷路の配列を返す."""
         # 迷路の配列を返す
         return self._grid
 
     def get_hex_grid(self) -> list[str]:
+        """迷路を16進数に変換する."""
         hex_grid = []
 
         for y in range(self._height):

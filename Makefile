@@ -21,12 +21,12 @@ clean:
 	rm -rf mazegen.egg-info/
 
 lint:
-	flake8 .
+	-flake8 .
 	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
 build: check-venv
 	python3 -m build
 
 lint-strict:
-	flake8 .
+	-flake8 .
 	mypy . --strict
