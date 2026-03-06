@@ -1,23 +1,18 @@
 *This project has been created as part of the 42 curriculum by nsato, tenomoto.*  
 
 ## 📖*Content*
+1. [💡Description](#Description)  
+2. [✅Instructions](#Instructions)  
+3. [⛏Additional sections](#Additional-sections)  
+4. [🌈Resources](#Resources)  
 
-1. [💡Description](#💡Description)
-2. [✅Instructions](#✅Instructions)  
-
-
-[⛏Additional sections](#Additional-sections) 
-
-
-[🌈Resources](./README.md#🌈Resources)
-
-## 💡Description
+## Description
 42Tokyo MileStone2 A-Maze-ing  
 ***独自の迷路生成器を作成しその結果を表示。***
 
 <img src="./.images/maze1.png" width="400"/>
 
-## ✅Instructions
+## Instructions
 
 1. 仮想環境の構築
 
@@ -293,7 +288,7 @@ __tenomoto__
     Pythonパッケージをビルドするツール。ソースコードを `.whl` や `.tar.gz` 形式に変換し、`pip install` できる配布可能な形式を生成する。
     
 
-# 🌈Resources
+# Resources
 + 参考サイト  
 [Python Documentation contents](https://docs.python.org/3/library/index.html)  
 [迷路生成・棒倒し法](https://algoful.com/Archive/Algorithm/MazeBar)  
