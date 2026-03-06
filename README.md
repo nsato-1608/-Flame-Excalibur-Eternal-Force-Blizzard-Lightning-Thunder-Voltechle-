@@ -3,9 +3,13 @@
 ## 📖*Content*
 
 1. [💡Description](#💡Description)
-2. [✅Instructions](#✅Instructions)
-3. [⛏Additional sections](#⛏Additional-sections)
-4. [🌈Resources](#🌈Resources)
+2. [✅Instructions](#✅Instructions)  
+
+
+[⛏Additional sections](#Additional-sections) 
+
+
+[🌈Resources](./README.md#🌈Resources)
 
 ## 💡Description
 42Tokyo MileStone2 A-Maze-ing  
@@ -55,7 +59,7 @@
     `make clean`
     
 
-## ⛏Additional sections
+## Additional sections
 
 ### 1. ファイル構成
 
@@ -90,20 +94,21 @@
 
 ### 3. 選択した迷路生成アルゴリズム
 
-__迷路生成__
-> 棒倒し法(バイナリツリー法)  
+__迷路生成__  
+棒倒し法(バイナリツリー法)  
 ![boutaoshi](./.images/boutaoshi.gif)
 
-__最短経路探索__
-> 幅優先探索  
-現在座標から移動可能な座標をqueueに追加して、既に訪れた座標を除いてその座標からさらに移動可能な座標をqueueに追加をゴール座標が見つかるまで繰り返す。  
+__最短経路探索__  
+幅優先探索  
+>現在座標から移動可能な座標をqueueに追加して、既に訪れた座標を除いてその座標からさらに移動可能な座標をqueueに追加をゴール座標が見つかるまで繰り返す。  
 そうすることで、常に最短なルートでゴールまでたどり着くことが出来る。
 
 ### 4. このアルゴリズムを選択した理由
 __迷路生成__  
-生成方法が直感的に理解しやすく、配列を使った迷路生成と相性が良かったため。  
+>生成方法が直感的に理解しやすく、配列を使った迷路生成と相性が良かったため。  
+
 __最短経路探索__  
-幅優先探索が深さ優先探索と比べて理解もしやすくqueueで管理することでコードが簡潔になったため。  
+>幅優先探索が深さ優先探索と比べて理解もしやすくqueueで管理することでコードが簡潔になったため。  
 
 ### 5. コードのどの部分が再利用可能か、およびその方法
 
@@ -225,7 +230,7 @@ __tenomoto__
 2月26日(木) 迷路生成、ターミナルに出力する。  
 2月27日(金) ターミナルに出力する。  
 2月28日(土) 迷路調整、完全迷路化、Perfectフラグ対応。  
-3月1日(日)  
+3月1日(日)  迷路探索アルゴリズムの実装。
 3月2日(月) README.md, Makefile作成。  
 3月3日(火) 最終チェック。提出。  
 3月4日(水) 提出バッファ。  
@@ -240,28 +245,26 @@ __nsato__
 スケジュール通りとはいかなかったものの、早い進捗で完成まで持っていくことができ、エラーハンドリング等細かい仕様を考慮しながら進められた。  
 特に後半のボーナスやユーザー操作等は人間の判断が必要なものであり、AIの助けを借りることはできなかったため、自力で対応できたのはいい経験になった。
 
-
 + 改善点  
 AIの使用タスク、使いどころを考えるべきだった。  
 アルゴリズムの理解や選定、調べるツールとしては利用してもいいと思ったが、課題要件のまとめ、必要なタスクや分担などは人間がチームに応じてやった方がいいし、個人としてその能力も磨くべきだったと感じた。
 タスク管理、残作業や方針、課題要件のまとめ等初動を次は丁寧にやっていきたい。
 
 __tenomoto__
-+ 成功した点
++ 成功した点  
+作業分担はしたが実装前に各々で使用するアルゴリズムを実際に書いたので、課題の提出だけにフォーカスを当てず、しっかりと学ぶべきポイントをそれぞれが学べたのが良かった。  
+相互でのコミュニケーションが多かったので、チームとしてうまく課題に取り組むことができた。
 
-+ 改善点
++ 改善点  
+当初のスケジュールよりも時間がかかってしまったので、作業の見積もりの精度を上げていくべきだと感じた。  
+課題を通して学べることを全て経験したかったので、一旦それぞれで実装してみようと提案したがそれが仇となり、作業分担が曖昧になってしまったので実務を想定するのであれば、双方のコミット時間や理解に応じて適切な作業分担をすべきであった。  
+初めてチーム開発でgitを使用したがわからない点が多かったのでより理解を深めていきたい。  
 
 ### 特定ツールの使用有無（使用した場合はその名称）
 
 +  Discord
 +  Notion
 +  [Git hub](https://github.com/nsato-1608/-Flame-Excalibur-Eternal-Force-Blizzard-Lightning-Thunder-Voltechle-/tree/main)
-- [PictoChat](https://pict.chat/#google_vignette)
-- [お絵描きの森](https://oekaki.hange.jp/)
-- [God Field](https://godfield.net/)
-- [寿司打](https://sushida.net/play.html)
-- [Krunker](https://krunker.io/)
-- [slither](http://slither.com/io)
 
 ### 7. 高度な機能（複数アルゴリズム、表示オプションなど）実装について
 
@@ -270,7 +273,7 @@ __tenomoto__
 **インストールしてるパッケージ**
 
 - **flake8**
-    
+
     Pythonコードのスタイルと文法エラーをチェックするツール。インデントのずれや未使用のimportなど、コードの問題を自動で検出する。
     
 - **pep8-naming**
@@ -290,16 +293,20 @@ __tenomoto__
     Pythonパッケージをビルドするツール。ソースコードを `.whl` や `.tar.gz` 形式に変換し、`pip install` できる配布可能な形式を生成する。
     
 
-## 🌈Resources
-
+# 🌈Resources
++ 参考サイト  
 [Python Documentation contents](https://docs.python.org/3/library/index.html)  
 [迷路生成・棒倒し法](https://algoful.com/Archive/Algorithm/MazeBar)  
 [迷路探索・幅優先探索](https://youtu.be/0_9heBS7Flg?si=gg7M-Xifp698Bdag)  
 [ANSI Escape Sequences](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797)  
 [mypyオプション](https://qiita.com/keng000/items/8e55e3cfdba888fba290)  
-+  AI使用タスク
-NotionAI  →  会議内容の文字起こし  
-Gemini  →   
++ AI使用タスク  
+__NotionAI__  
+>会議内容の文字起こし  
 
-if print_flag and (self._width > 49 and self._height > 49):
-    raise ValueError("The maze is too large. It cannnot be drawn.")
+__Gemini__  
+>READMEにおけるファイル構成の出力  
+ボーナスパートの案出し
+
+__Special Thanks__  
+shayashi
