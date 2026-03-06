@@ -91,7 +91,7 @@ class MazeGenerator:
             entry_point (tuple[int, int]):迷路のスタート座標.
             exit_point (tuple[int, int]):迷路のゴール座標.
             perfect (bool):完全迷路か不完全迷路を切り替えるための値.
-            seed (int | None):迷路をランダムに生成するための値.
+            seed (int):迷路をランダムに生成するための値.
             pattern (bool): 42ロゴの生成を切り替えるための値.
         """
         self._width = width
@@ -116,7 +116,7 @@ class MazeGenerator:
 
         # 横の配列 * 縦の配列のリスト(一旦ROADで埋める)
         self._grid: list[list[int]] = [
-            [Cell.ROAD] * self._w_grid
+            [Cell.ROAD.value] * self._w_grid
             for _ in range(self._h_grid)
         ]
 
@@ -125,13 +125,17 @@ class MazeGenerator:
         sleep_anime: bool = False,
         print_flag: bool = False
     ) -> None:
-        """迷路を生成する."""
+        """迷路を生成する.
+
+        Args:
+            sleep_anime (bool):アニメーション実行フラグ.
+            print_flag (bool):ターミナル描画フラグ.
+        """
         # 横の配列 * 縦の配列のリスト(一旦ROADで埋める)
         self._grid: list[list[int]] = [
-            [Cell.ROAD] * self._w_grid
+            [Cell.ROAD.value] * self._w_grid
             for _ in range(self._h_grid)
         ]
-
         # シード値(再現性の確保)
         if self._seed > 0:
             random.seed(self._seed)
@@ -153,8 +157,8 @@ class MazeGenerator:
             raise ValueError("EXIT_POINT is not minus value")
 
         # ENTRY, EXIT埋め込み
-        self._grid[ey * 2 + 1][ex * 2 + 1] = Cell.ENTRY
-        self._grid[gy * 2 + 1][gx * 2 + 1] = Cell.EXIT
+        self._grid[ey * 2 + 1][ex * 2 + 1] = Cell.ENTRY.value
+        self._grid[gy * 2 + 1][gx * 2 + 1] = Cell.EXIT.value
 
         # 周りのWALL埋め込み
         self._build_outer_walls(
@@ -181,11 +185,12 @@ class MazeGenerator:
         sleep_anime: bool = False,
         print_flag: bool = False
     ) -> None:
-        """迷路の外壁を生成する."""
-        # アニメーション処理
-        sleep_time = 0.0
-        if sleep_anime:
-            sleep_time = 1.0
+        """迷路の外壁を生成する.
+
+        Args:
+            sleep_anime (bool):アニメーション実行フラグ.
+            print_flag (bool):ターミナル描画フラグ.
+        """
         # 縦配列(y) * 横配列(x) 分ループ、上下左右の辺にWALL埋め込み
         for y in range(0, self._h_grid):
             for x in range(0, self._w_grid):
@@ -193,10 +198,10 @@ class MazeGenerator:
                     y == 0 or y == self._h_grid - 1
                     or x == 0 or x == self._w_grid - 1
                 ):
-                    self._grid[y][x] = Cell.WALL
+                    self._grid[y][x] = Cell.WALL.value
 
         if print_flag and sleep_anime:
-            self.print_maze(sleep_time)
+            self.print_maze(1.0)
         return None
 
     def _build_fourty_two(
@@ -204,12 +209,12 @@ class MazeGenerator:
         sleep_anime: bool = False,
         print_flag: bool = False
     ) -> None:
-        """迷路の中に42ロゴを生成する."""
-        # アニメーション処理
-        sleep_time = 0.0
-        if sleep_anime:
-            sleep_time = 1.0
+        """迷路の中に42ロゴを生成する.
 
+        Args:
+            sleep_anime (bool):アニメーション実行フラグ.
+            print_flag (bool):ターミナル描画フラグ.
+        """
         # 42スタンプパターン
         ft_pattern = [
             [1, 0, 0, 0, 1, 1, 1],
@@ -223,7 +228,7 @@ class MazeGenerator:
         start_x = (self._width - 7) // 2
         start_y = (self._height - 5) // 2
 
-        # 42スタンプ使用済みフラグ、開始座標
+        # 42スタンプ使用済みフラグ、開始座標、終了座標
         self._has_ft = True
         self._ft_min_x = start_x * 2
         self._ft_max_x = (start_x + 7) * 2
@@ -246,26 +251,28 @@ class MazeGenerator:
                 sy = (start_y + row) * 2 + 1
 
                 # 42スタンプ埋め
-                self._grid[sy][sx] = Cell.FOURTY_TWO
+                self._grid[sy][sx] = Cell.FOURTY_TWO.value
 
                 # 42スタンプのセル周囲7マスを壁埋め
                 for dy, dx in surrounding_offsets:
-                    self._grid[sy + dy][sx + dx] = Cell.WALL
+                    self._grid[sy + dy][sx + dx] = Cell.WALL.value
 
+        # アニメーション処理
         if print_flag and sleep_anime:
-            self.print_maze(sleep_time)
+            self.print_maze(1.0)
         return None
 
     def _pillars_and_knock(
-        self, sleep_anime: bool = False,
+        self,
+        sleep_anime: bool = False,
         print_flag: bool = False
     ) -> None:
-        """棒倒し方のアルゴリズム."""
-        # アニメーション処理
-        sleep_time = 0.0
-        if sleep_anime:
-            sleep_time = 0.05
+        """棒倒し方のアルゴリズム.
 
+        Args:
+            sleep_anime (bool):アニメーション実行フラグ.
+            print_flag (bool):ターミナル描画フラグ.
+        """
         # 追加で棒倒しをする箇所の、42スタンプの左上からの相対座標
         target_pillars = [
             (4, 0), (6, 0), (4, 2), (6, 2),  # 42の4の上の部分
@@ -290,14 +297,13 @@ class MazeGenerator:
 
                 # 基本処理
                 # 柱の埋め込み
-                self._grid[y][x] = Cell.WALL
+                self._grid[y][x] = Cell.WALL.value
 
-                # perfectじゃない時は2割の確率で棒を倒さない
-                if (
-                    not self._perfect and random.random() > 0.6
-                    and (self._grid[y - 1][x] is Cell.WALL
-                    or self._grid[y][x - 1] is Cell.WALL)
-                ):
+                # perfectじゃないかつ柱の左と上に棒が倒れている時
+                # 4割の確率で棒を倒さない
+                if (not self._perfect and random.random() > 0.6
+                   and (self._grid[y - 1][x] is Cell.WALL.value
+                   or self._grid[y][x - 1] is Cell.WALL.value)):
                     continue
 
                 # 基本は右と下に倒す(SとE)
@@ -311,9 +317,9 @@ class MazeGenerator:
 
                 # 棒倒し!
                 dx, dy = random.choice(directions)
-                self._grid[y + dy][x + dx] = Cell.WALL
+                self._grid[y + dy][x + dx] = Cell.WALL.value
                 if print_flag and sleep_anime:
-                    self.print_maze(sleep_time)
+                    self.print_maze(0.05)
         return None
 
     print_init = False
@@ -347,19 +353,19 @@ class MazeGenerator:
         for row in self._grid:
             for cell in row:
                 if (
-                    cell is Cell.ROAD or
-                    (cell is Cell.ROUTE and not show_path)
+                    cell is Cell.ROAD.value or
+                    (cell is Cell.ROUTE.value and not show_path)
                 ):
                     output += f"{r_color}  {reset}"
-                elif cell is Cell.WALL:
+                elif cell is Cell.WALL.value:
                     output += f"{w_color}  {reset}"
-                elif cell is Cell.ENTRY:
+                elif cell is Cell.ENTRY.value:
                     output += f"{s_color}S {reset}"
-                elif cell is Cell.EXIT:
+                elif cell is Cell.EXIT.value:
                     output += f"{g_color}G {reset}"
-                elif cell is Cell.FOURTY_TWO:
+                elif cell is Cell.FOURTY_TWO.value:
                     output += f"{ft_color}  {reset}"
-                elif cell is Cell.ROUTE:
+                elif cell is Cell.ROUTE.value:
                     output += f"{y_color}  {reset}"
             output += "\n"
 
@@ -408,7 +414,7 @@ class MazeGenerator:
 
                 x, y = route[end]
                 while (x, y) != start:
-                    self._grid[y][x] = Cell.ROUTE
+                    self._grid[y][x] = Cell.ROUTE.value
                     x, y = route[(x, y)]
                 return path_str
 
@@ -419,7 +425,8 @@ class MazeGenerator:
                 (cx, cy - 1),
                 (cx, cy + 1)
             ):
-                if self._grid[ny][nx] in {Cell.ROAD, Cell.EXIT} and (nx, ny) not in route:
+                if (self._grid[ny][nx] in {Cell.ROAD.value, Cell.EXIT.value}
+                   and (nx, ny) not in route):
                     q.append((nx, ny))
                     route[(nx, ny)] = current
         return ""
@@ -445,31 +452,9 @@ class MazeGenerator:
                     (0b0100, self._grid[grid_y + 1][grid_x]),
                     (0b1000, self._grid[grid_y][grid_x - 1])
                 ):
-                    if cell in {Cell.WALL, Cell.FOURTY_TWO}:
+                    if cell in {Cell.WALL.value, Cell.FOURTY_TWO.value}:
                         cell_value |= val
 
-#                if self._grid[grid_y][grid_x - 1] in (
-#                    Cell.WALL,
-#                    Cell.FOURTY_TWO,
-#                ):
-#                    cell_value |= 8
-#                if self._grid[grid_y + 1][grid_x] in (
-#                    Cell.WALL,
-#                    Cell.FOURTY_TWO,
-#                ):
-#                    cell_value |= 4
-#                if self._grid[grid_y][grid_x + 1] in (
-#                    Cell.WALL,
-#                    Cell.FOURTY_TWO,
-#                ):
-#                    cell_value |= 2
-#                if self._grid[grid_y - 1][grid_x] in (
-#                    Cell.WALL,
-#                    Cell.FOURTY_TWO,
-#                ):
-#                    cell_value |= 1
                 str_line += f"{cell_value:X}"
-
             hex_grid.append(str_line)
-
         return hex_grid

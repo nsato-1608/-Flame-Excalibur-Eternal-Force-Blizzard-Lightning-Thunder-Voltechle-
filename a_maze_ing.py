@@ -60,8 +60,8 @@ def parse_config(file_path: str) -> MazeConfig:
             if not line or line.startswith("#"):
                 continue
             key, value = line.split("=", 1)
-            key_tmp: str = key.strip().upper()
-            if key_tmp in config_data:
+            key = key.strip().upper()
+            if key in config_data:
                 raise ValueError(f"Config key: '{key}' duplicated")
             config_data[key] = value.strip()
 
@@ -74,36 +74,28 @@ def parse_config(file_path: str) -> MazeConfig:
             raise ValueError("missing config key or value")
         raise ValueError("invalid value 'True or False'")
 
-    width = int(config_data["WIDTH"])
-    height = int(config_data["HEIGHT"])
     entry_row = config_data["ENTRY"].split(",")
-    entry_point = (int(entry_row[0]), int(entry_row[1]))
     exit_row = config_data["EXIT"].split(",")
-    exit_point = (int(exit_row[0]), int(exit_row[1]))
-    output_file = config_data["OUTPUT_FILE"]
-    perfect = strtobool(config_data.get("PERFECT"))
-    seed = int(config_data.get("SEED", 0))
-    pattern = strtobool(config_data.get("PATTERN", "True"))
 
     return MazeConfig(
-        width=width,
-        height=height,
-        entry_point=entry_point,
-        exit_point=exit_point,
-        output_file=output_file,
-        perfect=perfect,
-        seed=seed,
-        pattern=pattern
+        width=int(config_data["WIDTH"]),
+        height=int(config_data["HEIGHT"]),
+        entry_point=(int(entry_row[0]), int(entry_row[1])),
+        exit_point=(int(exit_row[0]), int(exit_row[1])),
+        output_file=config_data["OUTPUT_FILE"],
+        perfect=strtobool(config_data.get("PERFECT")),
+        seed=int(config_data.get("SEED", 0)),
+        pattern=strtobool(config_data.get("PATTERN", "True"))
     )
 
 
 def save_to_file(
-        file_path: str,
-        hex_grid: list[str],
-        entry_point: tuple[int, int],
-        exit_point: tuple[int, int],
-        path_str: str
-        ) -> None:
+    file_path: str,
+    hex_grid: list[str],
+    entry_point: tuple[int, int],
+    exit_point: tuple[int, int],
+    path_str: str
+) -> None:
     """迷路をファイルに保存する.
 
     Args:
@@ -121,7 +113,7 @@ def save_to_file(
 
             f.write(f"{entry_point[0]},{entry_point[1]}\n")
             f.write(f"{exit_point[0]},{exit_point[1]}\n")
-            f.write(f"{path_str}\n")
+            f.write(f"{path_str}")
 
     except OSError as e:
         print(f"Error: Failed to save the maze to '{file_path}'."
@@ -158,7 +150,7 @@ def main() -> None:
 
     # 迷路の描画、最短経路表示、カラースキームを初期化
     needs_generation = True
-    show_path = False
+    show_path = True
     color_scheme = 0
     sleep_anime = True
     print_flag = True
@@ -167,7 +159,7 @@ def main() -> None:
         # 迷路を生成するフラグがTrueの時のみ描画処理
         if needs_generation:
             # CLIでの変更を引き継がない
-            show_path = False
+            show_path = True
             color_scheme = 0
             print(f"Generating a {config.width} × {config.height} maze")
             try:
@@ -203,6 +195,8 @@ def main() -> None:
                 # プリントフラグがなければここで終了
                 if not print_flag:
                     return
+
+                # 迷路描画後に最短経路表示
                 sleep(1)
                 generator.print_maze(show_path=show_path)
 
@@ -222,14 +216,16 @@ def main() -> None:
         # operations: CLIで選択できる操作一覧
         # operation: ユーザーに実際に選択された操作
         operations = {
-            "1": "Re-generate a new maze",
-            "2": "Show/Hide path from entry to exit",
+            "1": "Re-generate",
+            "2": "Show/Hide path from entry to exit "
+            f"[Current: {'Show' if show_path else 'Hide'}]",
             "3": "Rotate maze colors",
-            "4": "Set new maze size",
-            "5": f"Set {'un' if config.perfect else ''}perfect maze",
-            "6": "Set seed value",
-            "7": "Set 42 pattern",
-            "8": "Change animetion",
+            "4": "New maze size "
+            f"[Current: {config.width} × {config.height}]",
+            "5": f"{'un' if config.perfect else ''}perfect maze",
+            "6": f"Seed value [Current: {config.seed}]",
+            "7": f"42 pattern [Current: {config.pattern}]",
+            "8": f"Animation [Current: {sleep_anime}]",
             "9": "Quit",
         }
         for key, value in operations.items():
