@@ -301,7 +301,7 @@ __NotionAI__
 
 __Gemini__  
 >READMEにおけるファイル構成の出力  
-ボーナスパートの案出し
+ボーナスパートの案出し  
 
 __Special Thanks__  
 shayashi

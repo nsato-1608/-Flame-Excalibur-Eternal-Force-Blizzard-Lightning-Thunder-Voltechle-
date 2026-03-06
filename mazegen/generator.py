@@ -129,7 +129,9 @@ class MazeGenerator:
         # シード値(再現性の確保)
         if self._seed > 0:
             random.seed(self._seed)
-
+        # ターミナル描画モード時、50×50以上はエラーにする
+        if print_flag and (self._width > 49 or self._height > 49):
+            raise ValueError("The maze is too large. It cannnot be drawn.")
         # ex, ey: ENTRYの座標
         ex, ey = self._entry_point
         # gx, gy: EXIT(ゴール)の座標(範囲外アクセスの可能性)

@@ -60,7 +60,10 @@ def parse_config(file_path: str) -> MazeConfig:
             if not line or line.startswith("#"):
                 continue
             key, value = line.split("=", 1)
-            config_data[key.strip().upper()] = value.strip()
+            key_tmp: str = key.strip().upper()
+            if key_tmp in config_data:
+                raise ValueError(f"Config key: '{key}' duplicated")
+            config_data[key] = value.strip()
 
     def strtobool(val: str | None) -> bool:
         if val == "True":
@@ -140,11 +143,17 @@ def main() -> None:
     except KeyError as e:
         print(f"Error: missing config key: {e.args[0].upper()}", file=stderr)
         exit(1)
-    except (ValueError, FileNotFoundError) as e:
+    except FileNotFoundError:
+        print("Error: No such file or dir", file=stderr)
+        exit(1)
+    except IsADirectoryError:
+        print("Error: Is a directory", file=stderr)
+        exit(1)
+    except (ValueError) as e:
         print(f"Error: {e}", file=stderr)
         exit(1)
     except Exception as e:
-        print(e)
+        print(f"Error:{e}", file=stderr)
         exit(1)
 
     # 迷路の描画、最短経路表示、カラースキームを初期化
@@ -204,6 +213,8 @@ def main() -> None:
             except Exception as e:
                 print(f"Error: {e}", file=stderr)
                 exit(1)
+            except KeyboardInterrupt:
+                needs_generation = False
 
         # ここからCLIの操作
         print("\n=== A-Maze-ing ===")
